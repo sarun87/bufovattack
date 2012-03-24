@@ -15,6 +15,7 @@ char grade = 'F';
 char Name[BUFSIZE];
 
 extern void init_sandbox(void);
+extern void readString(char *s, int r);
 
 int main(int argc, char *argv[]) {
    int r = 0;
