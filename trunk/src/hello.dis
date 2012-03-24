@@ -1,0 +1,47 @@
+0x000000000040070a <readString+0>:      push   %rbp
+0x000000000040070b <readString+1>:      mov    %rsp,%rbp
+0x000000000040070e <readString+4>:      push   %r13
+0x0000000000400710 <readString+6>:      push   %r12
+0x0000000000400712 <readString+8>:      push   %rbx
+0x0000000000400713 <readString+9>:      sub    $0x8,%rsp
+0x0000000000400717 <readString+13>:     mov    %rdi,%r13
+0x000000000040071a <readString+16>:     mov    %rdx,-0x20(%rbp)
+0x000000000040071e <readString+20>:     add    $0x24,%esi				# To Create buf with 36 + r. Add 36 (BUFFSIZE)
+0x0000000000400721 <readString+23>:     movslq %esi,%rsi
+0x0000000000400724 <readString+26>:     add    $0x1e,%rsi
+0x0000000000400728 <readString+30>:     and    $0xfffffffffffffff0,%rsi
+0x000000000040072c <readString+34>:     sub    %rsi,%rsp
+0x000000000040072f <readString+37>:     lea    0xf(%rsp),%rax		
+0x0000000000400734 <readString+42>:     mov    %rax,%r12
+0x0000000000400737 <readString+45>:     and    $0xfffffffffffffff0,%r12
+0x000000000040073b <readString+49>:     mov    $0x0,%ebx				# Initalize i with 0 
+0x0000000000400740 <readString+54>:     mov    0x200679(%rip),%rdi        # 0x600dc0 <stdin@@GLIBC_2.2.5> (Start of for loop)
+0x0000000000400747 <readString+61>:     callq  0x4005e0 <fgetc@plt> 	# call to fgetc. Address of fgetc - 0x4005e0
+0x000000000040074c <readString+66>:     mov    %eax,%edx
+0x000000000040074e <readString+68>:     cmp    $0xffffffffffffffff,%eax # compare with EOF
+0x0000000000400751 <readString+71>:     je     0x400764 <readString+90> # On equal jump to break at 0x400764
+0x0000000000400753 <readString+73>:     cmp    $0xa,%eax				# compare with \n
+0x0000000000400756 <readString+76>:     je     0x400764 <readString+90> # On equal jump to break at 0x400764
+0x0000000000400758 <readString+78>:     movslq %ebx,%rax
+0x000000000040075b <readString+81>:     mov    %dl,(%r12,%rax,1)		# Add char to buffer.
+0x000000000040075f <readString+85>:     add    $0x1,%ebx				# Increment i (value stored in ebx) by 1
+0x0000000000400762 <readString+88>:     jmp    0x400740 <readString+54> # Call for loop again
+0x0000000000400764 <readString+90>:     movslq %ebx,%rax
+0x0000000000400767 <readString+93>:     movb   $0x0,(%r12,%rax,1)		# store 0 to last char of buffer 
+0x000000000040076c <readString+98>:     mov    $0x0,%edx				# i = 0 for 2nd for loop
+0x0000000000400771 <readString+103>:    movzbl (%r12,%rdx,1),%eax		# Start of for loop.
+0x0000000000400776 <readString+108>:    mov    %al,0x0(%r13,%rdx,1)		# s[i] = buf[i]
+0x000000000040077b <readString+113>:    add    $0x1,%rdx				# add 1 to i
+0x000000000040077f <readString+117>:    cmp    $0x24,%rdx				# 
+0x0000000000400783 <readString+121>:    jne    0x400771 <readString+103> # while not equal loop
+0x0000000000400785 <readString+123>:    mov    %r13,%rdi				
+0x0000000000400788 <readString+126>:    mov    $0x0,%eax
+0x000000000040078d <readString+131>:    callq  *-0x20(%rbp)
+0x0000000000400790 <readString+134>:    lea    -0x18(%rbp),%rsp
+0x0000000000400794 <readString+138>:    pop    %rbx
+0x0000000000400795 <readString+139>:    pop    %r12
+---Type <return> to continue, or q <return> to quit---
+0x0000000000400797 <readString+141>:    pop    %r13
+0x0000000000400799 <readString+143>:    leaveq
+0x000000000040079a <readString+144>:    retq
+End of assembler dump.
