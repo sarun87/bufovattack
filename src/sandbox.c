@@ -2,31 +2,46 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/mman.h>
-#include <ucontext.h>
+#include <sys/ucontext.h>
+
+#define REG_RSP 20
+#define REG_RIP 17
 
 extern void readString(char *s, int r);
 
 void signalFunc(int sig, siginfo_t *siginfo, void *ucp)
 {
-	static ucontext_t *recordedAddress = 0;
+	static unsigned int recordedAddress = 0;
+	static unsigned int functionStartAddress = 0;
 	if (recordedAddress == 0)
 	{
 		//Entering a function.
-		recordedAddress = ((ucontext_t *) ucp)->uc_link;//siginfo->si_addr;
-		printf("\nSIGSEV - Entering a function");
+		recordedAddress = (unsigned long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RSP];
+		functionStartAddress = (unsigned long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP];
 		//Unprotect the page corresponding to the SIGSEGV
-		mprotect((void*)(*(unsigned int *) siginfo->si_addr&0xfffffffffffff000), 1,PROT_READ | PROT_WRITE | PROT_EXEC);
+		//functionStartAddress = *(unsigned int *) siginfo->si_addr;
+		printf("\nSIGSEV - Entering a function (%u)",functionStartAddress);
+		printf("\nRecorded address - %x",recordedAddress);
+		if (mprotect((void*)(functionStartAddress&0xfffffffffffff000), 1,PROT_WRITE | PROT_EXEC | PROT_READ) == -1)
+		{
+			printf("\nmprotect failed for %u",functionStartAddress);
+			exit(0);
+		}
 		//Protect the page where the call originated from.
-		mprotect((void*)(recordedAddress & 0xfffffffffffff000), 1, PROT_WRITE | PROT_EXEC);
+		if (mprotect((void*)(recordedAddress & 0xfffffffffffff000), 1, PROT_NONE) == -1)
+		{
+			printf("\nmprotect failed for %u",recordedAddress);
+			exit(0);
+		}
 	}
-	else// if (recordedAddress == *(unsigned int *) siginfo->si_addr)
+	else if (recordedAddress == (unsigned long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP])
 	{
 		//Leaving a function.
-		printf("\nSIGSEV - Leaving a function (%u)",recordedAddress);
+		printf("\nSIGSEV - Leaving a function (%u)",functionStartAddress);
 		//Unprotect the target page of the return
-		mprotect((void*)(recordedAddress & 0xfffffffffffff000), 1,PROT_READ | PROT_WRITE | PROT_EXEC);
+		mprotect((void*)(recordedAddress & 0xfffffffffffff000), 1, PROT_WRITE | PROT_EXEC | PROT_READ);
 		//Protect where the call originated from
-		mprotect((void*)(*(unsigned int *) ucp & 0xfffffffffffff000), 1, PROT_WRITE | PROT_EXEC);
+		mprotect((void*)(functionStartAddress & 0xfffffffffffff000), 1, PROT_NONE);
 		recordedAddress = 0;
 	}
 	//else
