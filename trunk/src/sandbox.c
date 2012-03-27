@@ -4,24 +4,27 @@
 #include <sys/mman.h>
 #include <sys/ucontext.h>
 
-#define REG_RSP 20
-#define REG_RIP 17
+#define REG_RSP 15
+#define REG_RIP 16
 
 extern void readString(char *s, int r);
 
 void signalFunc(int sig, siginfo_t *siginfo, void *ucp)
 {
-	static unsigned int recordedAddress = 0;
-	static unsigned int functionStartAddress = 0;
+	static unsigned long long recordedAddress = 0;
+	static unsigned long long functionStartAddress = 0;
 	if (recordedAddress == 0)
 	{
 		//Entering a function.
-		recordedAddress = (unsigned long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RSP];
-		functionStartAddress = (unsigned long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP];
+		recordedAddress = (unsigned long long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RSP];
+		functionStartAddress = (unsigned long long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP];
 		//Unprotect the page corresponding to the SIGSEGV
 		//functionStartAddress = *(unsigned int *) siginfo->si_addr;
 		printf("\nSIGSEV - Entering a function (%u)",functionStartAddress);
 		printf("\nRecorded address - %x",recordedAddress);
+		printf("\nStack Pointer - %x",(unsigned long long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RSP]);
+		printf("\nInstruction Pointer - %x",(unsigned long long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP]);
+		printf("\nsiginfo->si_addr - %x",*((unsigned long long *) siginfo->si_addr));
 		if (mprotect((void*)(functionStartAddress&0xfffffffffffff000), 1,PROT_WRITE | PROT_EXEC | PROT_READ) == -1)
 		{
 			printf("\nmprotect failed for %u",functionStartAddress);
@@ -34,7 +37,7 @@ void signalFunc(int sig, siginfo_t *siginfo, void *ucp)
 			exit(0);
 		}
 	}
-	else if (recordedAddress == (unsigned long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP])
+	else if (recordedAddress == (unsigned long long)((ucontext_t *) ucp)->uc_mcontext.gregs[REG_RIP])
 	{
 		//Leaving a function.
 		printf("\nSIGSEV - Leaving a function (%u)",functionStartAddress);
