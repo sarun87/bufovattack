@@ -167,11 +167,6 @@ void fnCaseS(){
 	inp[105] = (char) 0x29;
 	inp[106] = (char) 0x40;
 	inp[107] = (char) 0x00;
-	// Writing the address of checkName
-	inp[64] = (char) 0x40;
-	inp[65] = (char) 0x18;
-	inp[66] = (char) 0x40;
-	inp[67] = (char) 0x00;
 	//inp[65] = (char) 0x07;
 	write(1,inp,108);
 	fflush(stdout);
