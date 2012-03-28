@@ -1,9 +1,13 @@
-0x000000000040070a <readString+0>:      push   %rbp
+-----------------------------------------------------------------
+readstring
+------------------------------------------------------------------
+
+0x000000000040070a <readString+0>:      push   %rbp						# push address to stack while entering the method.
 0x000000000040070b <readString+1>:      mov    %rsp,%rbp
 0x000000000040070e <readString+4>:      push   %r13
 0x0000000000400710 <readString+6>:      push   %r12
 0x0000000000400712 <readString+8>:      push   %rbx
-0x0000000000400713 <readString+9>:      sub    $0x8,%rsp
+0x0000000000400713 <readString+9>:      sub    $0x8,%rsp				# Get the parameters from stack.
 0x0000000000400717 <readString+13>:     mov    %rdi,%r13
 0x000000000040071a <readString+16>:     mov    %rdx,-0x20(%rbp)
 0x000000000040071e <readString+20>:     add    $0x24,%esi				# To Create buf with 36 + r. Add 36 (BUFFSIZE)
@@ -36,12 +40,81 @@
 0x0000000000400783 <readString+121>:    jne    0x400771 <readString+103> # while not equal loop
 0x0000000000400785 <readString+123>:    mov    %r13,%rdi				
 0x0000000000400788 <readString+126>:    mov    $0x0,%eax
-0x000000000040078d <readString+131>:    callq  *-0x20(%rbp)
+0x000000000040078d <readString+131>:    callq  *-0x20(%rbp)				# Call f(s)
 0x0000000000400790 <readString+134>:    lea    -0x18(%rbp),%rsp
-0x0000000000400794 <readString+138>:    pop    %rbx
+0x0000000000400794 <readString+138>:    pop    %rbx						# get return address and return from readString
 0x0000000000400795 <readString+139>:    pop    %r12
 ---Type <return> to continue, or q <return> to quit---
 0x0000000000400797 <readString+141>:    pop    %r13
 0x0000000000400799 <readString+143>:    leaveq
 0x000000000040079a <readString+144>:    retq
 End of assembler dump.
+
+
+
+-------------------------------------------------------------------------
+Main
+-------------------------------------------------------------------------
+
+(gdb) disassem main
+Dump of assembler code for function main:
+0x000000000040079b <main+0>:    push   %rbp						# Push base pointer to stack
+0x000000000040079c <main+1>:    push   %rbx
+0x000000000040079d <main+2>:    sub    $0x8,%rsp				# Get addr of fn. parameters
+0x00000000004007a1 <main+6>:    mov    %edi,%ebx
+0x00000000004007a3 <main+8>:    mov    %rsi,%rbp
+0x00000000004007a6 <main+11>:   callq  0x4005d0 <getpid@plt>	# Call getpid
+0x00000000004007ab <main+16>:   mov    %eax,%edi
+0x00000000004007ad <main+18>:   callq  0x4005f0 <srand@plt>		# Call srand
+0x00000000004007b2 <main+23>:   cmp    $0x1,%ebx				# Check to see if argc > 1
+0x00000000004007b5 <main+26>:   jle    0x4007d8 <main+61>
+0x00000000004007b7 <main+28>:   mov    0x8(%rbp),%rax
+0x00000000004007bb <main+32>:   cmpb   $0x72,(%rax)				# Check if arg passed is 'r'
+0x00000000004007be <main+35>:   jne    0x4007d8 <main+61>
+0x00000000004007c0 <main+37>:   callq  0x400600 <rand@plt>		# call rand()
+0x00000000004007c5 <main+42>:   mov    %eax,%edx				# next lines - Mod 32
+0x00000000004007c7 <main+44>:   sar    $0x1f,%edx
+0x00000000004007ca <main+47>:   shr    $0x1b,%edx
+0x00000000004007cd <main+50>:   add    %edx,%eax				
+0x00000000004007cf <main+52>:   and    $0x1f,%eax
+0x00000000004007d2 <main+55>:   mov    %eax,%ebx
+0x00000000004007d4 <main+57>:   sub    %edx,%ebx
+0x00000000004007d6 <main+59>:   jmp    0x4007dd <main+66>
+0x00000000004007d8 <main+61>:   mov    $0x0,%ebx
+0x00000000004007dd <main+66>:   lea    0x2005fd(%rip),%edi        # 0x600de0 <Name> Load Name addr
+0x00000000004007e3 <main+72>:   and    $0xfffff000,%edi			  # And it with the hex for mprotect 1st arg
+0x00000000004007e9 <main+78>:   mov    $0x7,%edx				  # OR the flags PROT_READ etc...
+0x00000000004007ee <main+83>:   mov    $0x1,%esi
+0x00000000004007f3 <main+88>:   callq  0x400580 <mprotect@plt>	  # Call mprotect
+0x00000000004007f8 <main+93>:   mov    $0x4009a8,%edi
+0x00000000004007fd <main+98>:   callq  0x4005a0 <puts@plt>		  # prints the question
+0x0000000000400802 <main+103>:  mov    $0x400869,%edx
+0x0000000000400807 <main+108>:  mov    %ebx,%esi
+0x0000000000400809 <main+110>:  mov    $0x600de0,%edi
+0x000000000040080e <main+115>:  callq  0x40070a <readString>	  # Call readString	
+0x0000000000400813 <main+120>:  mov    $0x600de0,%esi			  # Next lines compare Name with Andrew Appel
+0x0000000000400818 <main+125>:  mov    $0x4009bb,%edi
+0x000000000040081d <main+130>:  mov    $0xd,%ecx
+0x0000000000400822 <main+135>:  repz cmpsb %es:(%rdi),%ds:(%rsi)
+0x0000000000400824 <main+137>:  seta   %dl
+0x0000000000400827 <main+140>:  setb   %al
+0x000000000040082a <main+143>:  cmp    %al,%dl
+0x000000000040082c <main+145>:  jne    0x400835 <main+154>
+---Type <return> to continue, or q <return> to quit---
+0x000000000040082e <main+147>:  movb   $0x43,0x20056f(%rip)        # 0x600da4 <grade> Set grade to 'C' (We need to get here for one of the exercise
+0x0000000000400835 <main+154>:  mov    $0x600de0,%esi
+0x000000000040083a <main+159>:  mov    $0x4009c8,%edi
+0x000000000040083f <main+164>:  mov    $0x0,%eax
+0x0000000000400844 <main+169>:  callq  0x400590 <printf@plt>	  # Print thank you Name
+0x0000000000400849 <main+174>:  movsbl 0x200554(%rip),%esi        # 0x600da4 <grade>
+0x0000000000400850 <main+181>:  mov    $0x4009f8,%edi
+0x0000000000400855 <main+186>:  mov    $0x0,%eax
+0x000000000040085a <main+191>:  callq  0x400590 <printf@plt>	  # print Recommended grade
+0x000000000040085f <main+196>:  mov    $0x0,%edi
+0x0000000000400864 <main+201>:  callq  0x4005b0 <exit@plt>		  # call exit
+End of assembler dump.
+(gdb)
+
+---------------------------------------------------------------------------------------------
+Memory Layouts
+---------------------------------------------------------------------------------------------
